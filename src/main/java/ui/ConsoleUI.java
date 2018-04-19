@@ -32,7 +32,7 @@ public class ConsoleUI {
     private static void init() {
         actions = new String[2];
         actions[0] = "1) Создать новый журнал";
-        actions[1] = "2) Работать в оценками";
+        actions[1] = "2) Работать c оценками";
     }
 
     // Метод отображения главного меню.
