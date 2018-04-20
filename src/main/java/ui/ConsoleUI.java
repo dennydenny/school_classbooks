@@ -1,16 +1,22 @@
 package ui;
 
 import exceptions.WrongChooseException;
+import models.Subject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import services.SubjectsService;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class ConsoleUI {
 
-    // РњР°СЃСЃРёРІ РІРѕР·РјРѕР¶РЅС‹С… РґРµР№СЃС‚РІРёР№ РјРµРЅСЋ.
+    private static final Logger logger = LogManager.getLogger(ConsoleUI.class);
+
+    // Массив возможных действий меню.
     private static String [] actions;
 
-    // РњРµС‚РєР° С‚РѕРіРѕ, С‡С‚Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РІС‹Р±СЂР°Р» РєР°РєРѕР№-С‚Рѕ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РІР°СЂРёР°РЅС‚ РјРµРЅСЋ.
+    // Метка того, что пользователь выбрал какой-то корректный вариант меню.
     private static boolean isChooseMaked = false;
 
     public static void main(String[] args) {
@@ -20,7 +26,7 @@ public class ConsoleUI {
                 showMainMenu();
             }
             catch (InputMismatchException e) {
-                System.out.println("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ! РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РёСЃРїРѕР»СЊР·СѓР№С‚Рµ С†РёС„СЂС‹ РґР»СЏ РІС‹Р±РѕСЂР° РІР°СЂРёР°РЅС‚Р°.");
+                System.out.println("Некорректный ввод! Пожалуйста, используйте цифры для выбора варианта.");
             }
             catch (WrongChooseException wrongChoose) {
                 System.out.println(wrongChoose.getMessage());
@@ -28,19 +34,21 @@ public class ConsoleUI {
         }
     }
 
-    // РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РјР°СЃСЃРёРІ РІРѕР·РјРѕР¶РЅС‹С… РґРµР№СЃС‚РІРёР№ РјРµРЅСЋ.
+    // Инициализируем массив возможных действий меню.
     private static void init() {
         actions = new String[2];
-        actions[0] = "1) РЎРѕР·РґР°С‚СЊ РЅРѕРІС‹Р№ Р¶СѓСЂРЅР°Р»";
-        actions[1] = "2) Р Р°Р±РѕС‚Р°С‚СЊ c РѕС†РµРЅРєР°РјРё";
+        actions[0] = "1) Создать новый журнал";
+        actions[1] = "2) Работать c оценками";
     }
 
-    // РњРµС‚РѕРґ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ.
+    // Метод отображения главного меню.
     private static void showMainMenu() throws WrongChooseException {
-        System.out.println("Р’Р°СЃ РїСЂРёРІРµС‚СЃС‚РІСѓРµС‚ РїСЂРёР»РѕР¶РµРЅРёРµ 'РЁРєРѕР»СЊРЅС‹Р№ Р¶СѓСЂРЅР°Р»'");
-        System.out.println("РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ РЅСѓР¶РЅРѕРµ РґРµР№СЃС‚РІРёРµ:");
+        logger.debug("Приложение запущено");
 
-        // РџРµСЂРµР±РёСЂР°РµРј Рё РІС‹РІРѕРґРёРј РІРѕР·РјРѕР¶РЅС‹Рµ РІР°СЂРёР°РЅС‚С‹ РјРµРЅСЋ.
+        System.out.println("Вас приветствует приложение 'Школьный журнал'");
+        System.out.println("Пожалуйста, выберите нужное действие:");
+
+        // Перебираем и выводим возможные варианты меню.
         for (String action : actions) {
             System.out.println(action);
         }
@@ -50,12 +58,24 @@ public class ConsoleUI {
         handleUserChoose(choose);
     }
 
-    // РњРµС‚РѕРґ РѕР±СЂР°Р±РѕС‚РєРё РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРіРѕ РІС‹Р±РѕСЂР°.
+    // Метод обработки пользовательского выбора.
     private static void handleUserChoose(int choose) throws WrongChooseException {
         if (choose < 1 || choose > actions.length) {
-            throw new WrongChooseException("Р’С‹Р±СЂР°РЅ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РІР°СЂРёР°РЅС‚. РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ СЃСЂРµРґРё РІРѕР·РјРѕР¶РЅС‹С…");
+            logger.info("Пользователь выбрал несуществующий вариант");
+            throw new WrongChooseException("Выбран несуществующий вариант. Пожалуйста, выберите среди возможных.12");
         }
         isChooseMaked = true;
-        System.out.println("WOWW!" + choose);
+        switch (choose) {
+            case 1:
+                break;
+            case 2:
+                SubjectsService subjectsService = new SubjectsService();
+                for (Subject sub : subjectsService.getSubjects()) {
+                    System.out.println(sub);
+                }
+                break;
+            default:
+                break;
+        }
     }
 }

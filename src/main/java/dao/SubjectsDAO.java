@@ -1,5 +1,6 @@
 package dao;
 
+import exceptions.IncorrectSubjectException;
 import models.Subject;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface SubjectsDAO {
 
-    List<Subject> getAllSubjects();
+    List<Subject> getAllSubjects() throws IncorrectSubjectException;
 
     List<Subject> addSubject(Subject subject);
 }

@@ -2,20 +2,27 @@ package services;
 
 import dao.SubjectsDAO;
 import dao.SubjectsDAOImpl;
+import exceptions.IncorrectSubjectException;
 import models.Subject;
 
 import java.util.List;
 
 public class SubjectsService {
 
-    private SubjectsDAO subjects;
+    private SubjectsDAO subjectsDao;
 
     // Метод, возвращающий полный список предметов.
     public List<Subject> getSubjects() {
-        if (subjects == null) {
-            subjects = new SubjectsDAOImpl();
+        if (subjectsDao == null) {
+            subjectsDao = new SubjectsDAOImpl();
         }
-        return subjects.getAllSubjects();
+        try {
+            return subjectsDao.getAllSubjects();
+        }
+        catch (IncorrectSubjectException e) {
+            //TODO: реализовать обработку исключений.
+        }
+        return null;
     }
 
     public void addNewSubject(Subject subject) {
