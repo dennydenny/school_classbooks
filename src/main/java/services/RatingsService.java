@@ -1,6 +1,8 @@
 package services;
 
 import entities.Class;
+import entities.Pupil;
+import entities.Rating;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.Date;
@@ -13,21 +15,45 @@ import java.util.stream.Collectors;
 public class RatingsService {
 
     private ClassService classService;
+    private ClassbooksService classbooksService;
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(RatingsService.class);
 
     public RatingsService() {
         this.classService = new ClassService();
+        this.classbooksService = new ClassbooksService();
     }
 
     // Метод добавления новой оценки.
-    public void addNewRate(int classId, String name, String pupilName, int rate, Date date) {
-        // Проверяем, что класс существует.
-        if (!isClassExist(classId)) {
-            logger.warn("Указанного класса не существует.");
-            return;
-        }
+    public void addNewRate(int classId, String subjectName, String pupilName, int rate, Date date) {
+        Rating rating = new Rating();
+        rating.setDate(date);
+        rating.setMark(rate);
 
-        // Проверяем, что указанный ученик существует.
+        // Получаем класс по идентификатору и имени ученика.
+        Class schoolClass = classService.getAllClasses().stream()
+                .filter(x -> x.getClassId() == classId
+                        &&
+                        x.getPupils().stream()
+                                .anyMatch(y -> y.getName().equals(pupilName)))
+                .collect(Collectors.toList())
+                .get(0);
+
+        // Проставляем идентификатор ученика из списка учеников класса.
+        rating.setPupilId(schoolClass.getPupils().stream()
+                .filter(x -> x.getName().equals(pupilName))
+                .collect(Collectors.toList())
+                .get(0)
+                .getpupilId());
+
+        //TODO: реализовать получение классбука и понять, нужен ли классбук вообще для оценки. Возможно, стоит вынести отдельный ид для журнала.
+        /*rating.setClassbookId(classbooksService.getClassbooks().entrySet().stream()
+                .filter(x -> x.getKey().getClassId() == classId
+                &&
+                            x.getValue().getName().equals(subjectName))
+                .collect(Collectors.toList())
+                .get(0)
+                .getKey().);
+                */
     }
 
     // Метод, для проверки существования класса. Возвращает true, если указанный класс существует.
