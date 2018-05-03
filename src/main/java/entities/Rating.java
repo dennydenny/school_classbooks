@@ -1,4 +1,4 @@
-package models;
+package entities;
 
 import java.util.Date;
 
@@ -6,10 +6,20 @@ import java.util.Date;
 public class Rating {
 
     private int id;
-    private int subjectId;
+    private int classbookId;
     private int pupilId;
     private int mark;
     private Date date;
+
+    public Rating() {
+    }
+
+    public Rating(int classbookId, int pupilId, int mark, Date date) {
+        this.classbookId = classbookId;
+        this.pupilId = pupilId;
+        this.mark = mark;
+        this.date = date;
+    }
 
     public int getId() {
         return id;
@@ -19,12 +29,12 @@ public class Rating {
         this.id = id;
     }
 
-    public int getSubjectId() {
-        return subjectId;
+    public int getClassbookId() {
+        return classbookId;
     }
 
-    public void setSubjectId(int subjectId) {
-        this.subjectId = subjectId;
+    public void setClassbookId(int classbookId) {
+        this.classbookId = classbookId;
     }
 
     public int getPupilId() {

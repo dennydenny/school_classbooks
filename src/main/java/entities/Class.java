@@ -1,18 +1,19 @@
-package models;
+package entities;
 
 import java.util.List;
 
 public class Class {
 
-    private int classValue;
+    private int classId;
+    //@JsonDeserialize(using = PupilsJsonDeserializer.class)
     private List<Pupil> pupils;
 
-    public int getClassValue() {
-        return classValue;
+    public int getClassId() {
+        return classId;
     }
 
-    public void setClassValue(int classValue) {
-        this.classValue = classValue;
+    public void setClassId(int classId) {
+        this.classId = classId;
     }
 
     public List<Pupil> getPupils() {

@@ -1,55 +1,56 @@
 package dao;
 
-import exceptions.IncorrectSubjectException;
-import models.Subject;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dao.interfaces.SubjectsDAO;
+import dao.util.FileHelper;
+import entities.Subject;
+import org.apache.logging.log4j.LogManager;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
+
 
 /**
  * Created by daniel.khaliulin on 20.04.2018.
  */
-public class SubjectsDAOImpl implements SubjectsDAO {
+public class SubjectsDAOImpl extends AbstractFileWriter implements SubjectsDAO {
 
-    private List<Subject> subjects;
-    private dao.util.FileReader fileReader;
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(SubjectsDAOImpl.class);
+    private final String fileName = "subjects.txt";
+    private List<Subject> allSubjects;
 
     public SubjectsDAOImpl() {
 
     }
 
+    // Метод, возвращающий полний список предметов.
     @Override
-    public List<Subject> getAllSubjects() throws IncorrectSubjectException {
-        List<Subject> allSubjects = new ArrayList<>();
+    public List<Subject> getAllSubjects() {
 
-        fileReader = new dao.util.FileReader();
-        String rawString = fileReader.readFile("subjects.txt");
-
-        if (!rawString.isEmpty()) {
-
-            // Разбиваем файл файл на строки.
-            String[] rawSubjects = rawString.split("\\r?\\n");
-
-            // Разбираем каждую строку и преобразуем в объект Subject.
-            for (String rawSubject : rawSubjects) {
-                String[] subjectData = rawSubject.split(";");
-
-                if (Integer.parseInt(subjectData[0]) < 0)
-                    throw new IncorrectSubjectException("Идентификатор школьного предмета не может быть меньше нуля.");
-
-                if (subjectData[1].isEmpty())
-                    throw new IncorrectSubjectException("Отсутствует название предмета для идентификатора " + subjectData[0]);
-
-                Subject subject = new Subject(Integer.parseInt(subjectData[0]), subjectData[1]);
-                allSubjects.add(subject);
-            }
+        // Lite-кэш, чтобы многократно не читать один и тот же файл.
+        if (allSubjects != null)
+        {
             return allSubjects;
         }
-        return null;
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            allSubjects = mapper.readValue(FileHelper.getDataFile(fileName), new TypeReference<List<Subject>>() {});
+        } catch (IOException e) {
+            logger.fatal("При загрузке списка предметов возникла критичная ошибка.", e);
+            return null;
+        }
+        return allSubjects;
     }
 
     @Override
-    public List<Subject> addSubject(Subject subject) {
-        return null;
+    public void addNewSubject(Subject subject) {
+        this.getAllSubjects();
+        allSubjects.add(subject);
+        // Очищаем файл.
+        FileHelper.cleanDataFileContent(fileName);
+        // Записываем обновленные данные в файл.
+        super.writeListToFile(allSubjects, fileName);
     }
 }

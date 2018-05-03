@@ -1,17 +1,24 @@
 package ui;
 
+import entities.Classbook;
 import exceptions.WrongChooseException;
-import models.Subject;
+import entities.Subject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import services.ClassbooksService;
 import services.SubjectsService;
 
+import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleUI {
 
     private static final Logger logger = LogManager.getLogger(ConsoleUI.class);
+    private static SubjectsService subjectsService = new SubjectsService();
+    private static ClassbooksService classbooksService = new ClassbooksService();
+    private static final Scanner scanner = new Scanner(System.in);
 
     // Массив возможных действий меню.
     private static String [] actions;
@@ -21,6 +28,7 @@ public class ConsoleUI {
 
     public static void main(String[] args) {
         init();
+        // Показываем главное меню.
         while (!isChooseMaked) {
             try {
                 showMainMenu();
@@ -53,9 +61,10 @@ public class ConsoleUI {
             System.out.println(action);
         }
 
-        Scanner scanner = new Scanner(System.in);
         int choose = scanner.nextInt();
+        // Обрабатываем выбор пользователя.
         handleUserChoose(choose);
+        isChooseMaked = false;
     }
 
     // Метод обработки пользовательского выбора.
@@ -64,18 +73,37 @@ public class ConsoleUI {
             logger.info("Пользователь выбрал несуществующий вариант");
             throw new WrongChooseException("Выбран несуществующий вариант. Пожалуйста, выберите среди возможных.12");
         }
+        // Отмечаем, что пользователь свой выбор сделал.
         isChooseMaked = true;
         switch (choose) {
             case 1:
+                AddNewClassbookOption();
                 break;
             case 2:
-                SubjectsService subjectsService = new SubjectsService();
-                for (Subject sub : subjectsService.getSubjects()) {
-                    System.out.println(sub);
-                }
                 break;
             default:
                 break;
         }
     }
+
+    // Метол, выводящий информацию о варианте добавления нового журнала.
+    private static void AddNewClassbookOption() {
+        System.out.println("Текущий список журналов:");
+
+        for(Map.Entry<Classbook, Subject> entry : classbooksService.getClassbooks().entrySet()) {
+            System.out.format(
+                    String.format("Класс %d, предмет %s.",
+                            entry.getKey().getClassId(),
+                            entry.getValue().getName()));
+            System.out.println();
+        }
+
+            System.out.println("Введите название предмета (допускается ввести новый предмет): ");
+            scanner.nextLine();
+            String subjectName = scanner.nextLine();
+            System.out.println("Введите номер класса: ");
+            int classId = scanner.nextInt();
+            scanner.nextLine();
+            classbooksService.addNewClassbook(classId, subjectName);
+        }
 }
