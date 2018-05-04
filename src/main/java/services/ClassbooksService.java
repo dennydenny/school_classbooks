@@ -98,12 +98,22 @@ public class ClassbooksService {
     }
 
     // Метод возвращает true, если такой журнал уже есть. False, если нет.
-    private boolean checkIsClassbookExist(int classId, String subjectName) {
-        Map<Classbook, Subject> classbooks = this.getClassbooks().entrySet().stream()
-                .filter(x -> x.getKey().getClassId() == classId && x.getValue().getName().equals(subjectName))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    // Если в параметре предмета передан null, осуществяется проверка по любому предмету.
+    public boolean checkIsClassbookExist(int classId, String subjectName) {
+        if (subjectName != null) {
+            Map<Classbook, Subject> classbooks = this.getClassbooks().entrySet().stream()
+                    .filter(x -> x.getKey().getClassId() == classId && x.getValue().getName().equals(subjectName))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        return classbooks.size() >= 1;
+            return classbooks.size() >= 1;
+        }
+        else {
+            Map<Classbook, Subject> classbooks = this.getClassbooks().entrySet().stream()
+                    .filter(x -> x.getKey().getClassId() == classId)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            return classbooks.size() >= 1;
+        }
     }
 
     // Метод, возвращающий максимальный идентификатор журнала из хранилища.

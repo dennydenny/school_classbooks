@@ -1,12 +1,16 @@
 package services;
 
+import dao.RatingsDAOImpl;
+import dao.interfaces.RatingsDAO;
 import entities.Class;
 import entities.Pupil;
 import entities.Rating;
 import org.apache.logging.log4j.LogManager;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -16,11 +20,13 @@ public class RatingsService {
 
     private ClassService classService;
     private ClassbooksService classbooksService;
+    private RatingsDAO ratingsDAO;
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(RatingsService.class);
 
     public RatingsService() {
         this.classService = new ClassService();
         this.classbooksService = new ClassbooksService();
+        this.ratingsDAO = new RatingsDAOImpl();
     }
 
     // Метод добавления новой оценки.
@@ -29,6 +35,7 @@ public class RatingsService {
         rating.setDate(date);
         rating.setMark(rate);
 
+        // Получаем идентификатор ученика.
         // Получаем класс по идентификатору и имени ученика.
         Class schoolClass = classService.getAllClasses().stream()
                 .filter(x -> x.getClassId() == classId
@@ -45,22 +52,22 @@ public class RatingsService {
                 .get(0)
                 .getpupilId());
 
-        //TODO: реализовать получение классбука и понять, нужен ли классбук вообще для оценки. Возможно, стоит вынести отдельный ид для журнала.
-        /*rating.setClassbookId(classbooksService.getClassbooks().entrySet().stream()
-                .filter(x -> x.getKey().getClassId() == classId
-                &&
-                            x.getValue().getName().equals(subjectName))
+        // Получаем идентификатор журнала (фильтруем по имени предмета и ид класса).
+        rating.setClassbookId(classbooksService.getClassbooks().entrySet().stream()
+                .filter(x -> x.getValue().getName().equals(subjectName) && x.getKey().getClassId() == classId)
                 .collect(Collectors.toList())
                 .get(0)
-                .getKey().);
-                */
-    }
+                .getKey()
+                .getId());
 
-    // Метод, для проверки существования класса. Возвращает true, если указанный класс существует.
-    private boolean isClassExist(int classId) {
-        List<Class> classes = classService.getAllClasses().stream()
-                .filter(x -> x.getClassId() == classId)
-                .collect(Collectors.toList());
-        return classes.size() > 0;
+        // Инкременитрируем идентификатор оценки.
+        rating.setId(ratingsDAO.getAllRatings().stream().
+                max(Comparator.comparing(y -> y.getId()))
+                .get()
+                .getId() + 1);
+        // Передаём в DAO.
+        if (ratingsDAO.addNewRate(rating)) {
+            logger.info("Ученику {} поставлена оценка {} по предмету {}", pupilName, rate, subjectName);
+        }
     }
 }

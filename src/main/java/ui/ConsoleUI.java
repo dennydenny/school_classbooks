@@ -103,23 +103,14 @@ public class ConsoleUI {
 
     // Метол, выводящий информацию о варианте добавления нового журнала.
     private static void addNewClassbookOption() {
-        System.out.println("Текущий список журналов:");
-
-        for(Map.Entry<Classbook, Subject> entry : classbooksService.getClassbooks().entrySet()) {
-            System.out.format(
-                    String.format("Класс %d, предмет %s.",
-                            entry.getKey().getClassId(),
-                            entry.getValue().getName()));
-            System.out.println();
-        }
-
-            System.out.println("Введите название предмета (допускается ввести новый предмет): ");
-            scanner.nextLine();
-            String subjectName = scanner.nextLine();
-            System.out.println("Введите номер класса: ");
-            int classId = scanner.nextInt();
-            scanner.nextLine();
-            classbooksService.addNewClassbook(classId, subjectName);
+        pringClassbooksInfo();
+        System.out.println("Введите название предмета (допускается ввести новый предмет): ");
+        scanner.nextLine();
+        String subjectName = scanner.nextLine();
+        System.out.println("Введите номер класса: ");
+        int classId = scanner.nextInt();
+        scanner.nextLine();
+        classbooksService.addNewClassbook(classId, subjectName);
         }
 
     // Метод для работы с оценками.
@@ -155,7 +146,7 @@ public class ConsoleUI {
         int classId = printClassEnterDialog();
 
         // Получаем предмет
-        String subjectName = printSubjectEnterDialog();
+        String subjectName = printSubjectEnterDialog(classId);
 
         // Получаем ФИО ученика.
         String pupilName = printPupilNameEnterDialog(classId);
@@ -180,7 +171,13 @@ public class ConsoleUI {
             classId = scanner.nextInt();
 
             if (classService.isClassExist(classId)) {
-                classIsCorrect = true;
+                // Проверяем, что для класса вообще создан хотя бы один журнал.
+                if (!classbooksService.checkIsClassbookExist(classId, null)) {
+                    System.out.println("Для введённого класса не создано ни одного журнала :(");
+                }
+                else {
+                    classIsCorrect = true;
+                }
             }
             else {
                 System.out.println("Введённого класса не существует. Пожалуйста, введите корректный.");
@@ -190,20 +187,30 @@ public class ConsoleUI {
     }
 
     // Диалог установки предмета.
-    private static String printSubjectEnterDialog() {
+    private static String printSubjectEnterDialog(int classId) {
         boolean subjectIsCorrect = false;
         String subjectName = new String();
+
         // Выводим диалог до тех пор, пока пользователь не введёт корректный предмет.
         while (!subjectIsCorrect) {
             System.out.println("Введите название предмета:");
             scanner.nextLine();
             subjectName = scanner.nextLine();
 
-            if (subjectsService.getSubjectByName(subjectName) != null) {
+            // Проверяем существование предмета.
+            if (subjectsService.getSubjectByName(subjectName) == null) {
+                System.out.println("Введённого предмета не существует. Пожалуйста, введите корректный.");
+                continue;
+            }
+
+            // Проверяем существование журнала для этого класса и предмета.
+            if (classbooksService.checkIsClassbookExist(classId, subjectName))
+            {
                 subjectIsCorrect = true;
             }
             else {
-                System.out.println("Введённого предмета не существует. Пожалуйста, введите корректный.");
+                System.out.println("Для указанного класса не существует журнала по этому предмету. Пожалуйста, введите предмет из существующего журнала.");
+                pringClassbooksInfo();
             }
         }
         return subjectName;
@@ -268,5 +275,17 @@ public class ConsoleUI {
             }
         }
         return rateDate;
+    }
+
+    // Метод для вывода существующих журналов.
+    private static void pringClassbooksInfo() {
+        System.out.println("Текущий список журналов:");
+        for(Map.Entry<Classbook, Subject> entry : classbooksService.getClassbooks().entrySet()) {
+            System.out.format(
+                    String.format("Класс %d, предмет %s.",
+                            entry.getKey().getClassId(),
+                            entry.getValue().getName()));
+            System.out.println();
+        }
     }
 }

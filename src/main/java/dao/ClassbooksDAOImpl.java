@@ -17,7 +17,6 @@ import java.util.List;
 public class ClassbooksDAOImpl extends AbstractFileWriter implements ClassBooksDAO {
 
     private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(ClassbooksDAOImpl.class);
-    private FileHelper fileReader;
     private String fileName = "classbooks.txt";
     private List<Classbook> allClassbooks;
 
