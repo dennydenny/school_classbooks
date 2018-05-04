@@ -6,6 +6,7 @@ import dao.ClassesDAOImpl;
 import dao.DAOGenericImpl;
 import dao.interfaces.ClassesDAO;
 import entities.Class;
+import entities.Pupil;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.List;

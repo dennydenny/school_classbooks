@@ -23,20 +23,6 @@ public class SubjectsService {
         return subjectsDao.getAllSubjects();
     }
 
-    // Метод возвращает предмет по его идентификатору.
-    public Subject getSubjectById(int id) {
-        List <Subject> matchedSubjects = this.getSubjects().stream().filter(x -> x.getId() == id).collect(Collectors.toList());
-        if (matchedSubjects.size() > 1) {
-            logger.warn("По идентификатору {} найдено более одного предмета. Чет подозрительно.", id);
-        }
-        if (matchedSubjects.size() == 0) {
-            logger.warn("По идентификатору {} не удалось найти ни одного предмета.", id);
-            return null;
-        }
-
-        return matchedSubjects.get(0);
-    }
-
     // Метод добавления нового предмета. Возвращает идентификатор созданного предмета.
     public int addNewSubject(String subjectName) {
         // Проверяем, что такого предмета ещё не существует.
@@ -62,6 +48,20 @@ public class SubjectsService {
                     .collect(Collectors.toList()).get(0)
                     .getId();
         }
+    }
+
+    // Метод возвращает предмет по его идентификатору.
+    public Subject getSubjectById(int id) {
+        List <Subject> matchedSubjects = this.getSubjects().stream().filter(x -> x.getId() == id).collect(Collectors.toList());
+        if (matchedSubjects.size() > 1) {
+            logger.warn("По идентификатору {} найдено более одного предмета. Чет подозрительно.", id);
+        }
+        if (matchedSubjects.size() == 0) {
+            logger.warn("По идентификатору {} не удалось найти ни одного предмета.", id);
+            return null;
+        }
+
+        return matchedSubjects.get(0);
     }
 
     // Метод возвращает предмет по его названию или Null, если такого предмета нет.

@@ -70,4 +70,10 @@ public class RatingsService {
             logger.info("Ученику {} поставлена оценка {} по предмету {}", pupilName, rate, subjectName);
         }
     }
+
+    // Метод получения списка оценок.
+    public List<Rating> getAllRatings() {
+        return ratingsDAO.getAllRatings();
+    }
+
 }

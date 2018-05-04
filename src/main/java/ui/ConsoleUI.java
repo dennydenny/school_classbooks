@@ -1,6 +1,8 @@
 package ui;
 
+import entities.Class;
 import entities.Classbook;
+import entities.Rating;
 import exceptions.WrongChooseException;
 import entities.Subject;
 import org.apache.logging.log4j.LogManager;
@@ -10,9 +12,11 @@ import services.ClassbooksService;
 import services.RatingsService;
 import services.SubjectsService;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ConsoleUI {
 
@@ -22,6 +26,7 @@ public class ConsoleUI {
     private static ClassService classService = new ClassService();
     private static RatingsService ratingsService = new RatingsService();
     private static final Scanner scanner = new Scanner(System.in);
+    private static final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
 
     // Массив возможных действий меню.
     private static String [] actions;
@@ -64,7 +69,7 @@ public class ConsoleUI {
     private static void showMainMenu() throws WrongChooseException {
         logger.debug("Приложение запущено");
 
-        System.out.println();
+        System.out.println("\n====================");
         System.out.println("Вас приветствует приложение 'Школьный журнал'");
         System.out.println("Пожалуйста, выберите нужное действие:");
 
@@ -103,7 +108,7 @@ public class ConsoleUI {
 
     // Метол, выводящий информацию о варианте добавления нового журнала.
     private static void addNewClassbookOption() {
-        pringClassbooksInfo();
+        printClassbooksInfo();
         System.out.println("Введите название предмета (допускается ввести новый предмет): ");
         scanner.nextLine();
         String subjectName = scanner.nextLine();
@@ -126,6 +131,7 @@ public class ConsoleUI {
                 setUpRating();
                 break;
             case 2:
+                showRatings();
                 break;
             case 3:
                 break;
@@ -210,7 +216,7 @@ public class ConsoleUI {
             }
             else {
                 System.out.println("Для указанного класса не существует журнала по этому предмету. Пожалуйста, введите предмет из существующего журнала.");
-                pringClassbooksInfo();
+                printClassbooksInfo();
             }
         }
         return subjectName;
@@ -278,7 +284,7 @@ public class ConsoleUI {
     }
 
     // Метод для вывода существующих журналов.
-    private static void pringClassbooksInfo() {
+    private static void printClassbooksInfo() {
         System.out.println("Текущий список журналов:");
         for(Map.Entry<Classbook, Subject> entry : classbooksService.getClassbooks().entrySet()) {
             System.out.format(
@@ -288,4 +294,53 @@ public class ConsoleUI {
             System.out.println();
         }
     }
+
+    // Метод для просмотра существующих оценок.
+    private static void showRatings() {
+
+        // Получаем класс.
+        int classId = printClassEnterDialog();
+
+        // Получаем предмет
+        String subjectName = printSubjectEnterDialog(classId);
+
+        // Получаем ФИО ученика.
+        String pupilName = printPupilNameEnterDialog(classId);
+
+        // Получаем идентификатор ученика
+        int pupilId = classService.getAllClasses().stream()
+                // Фильтруем по ид класса.
+                .filter(x -> x.getClassId() == classId)
+                .collect(Collectors.toList())
+                .get(0)
+                // Разбираем список учеников класса и достаем ид ученика..
+                .getPupils().stream()
+                    .filter(p -> p.getName().equals(pupilName))
+                    .collect(Collectors.toList())
+                    .get(0)
+                    .getpupilId();
+
+        // Получаем идентификатор журнала.
+        int classbookId = classbooksService.getClassbooks().entrySet().stream()
+                .filter(x -> x.getValue().getName().equals(subjectName) && x.getKey().getClassId() == classId)
+                .collect(Collectors.toList())
+                .get(0)
+                .getKey()
+                .getId();
+
+        // Выводим оценки. Фильтруем список оценок по журналу и ид ученика.
+        List<Rating> ratings = ratingsService.getAllRatings().stream()
+                .filter(x -> x.getClassbookId() == classbookId
+                        && x.getPupilId() == pupilId)
+                .collect(Collectors.toList());
+        if (ratings.size() == 0) {
+            System.out.println("У этого ученика нет оценок по предмету.");
+        }
+        else {
+            System.out.println("Список оценок:");
+            ratings.stream().forEach(r -> System.out.format("Дата: %s Оценка: %d", df.format(r.getDate()), r.getMark()));
+        }
+    }
+
+
 }
