@@ -7,6 +7,7 @@ import entities.Subject;
 import org.apache.logging.log4j.LogManager;
 
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class ClassbooksService {
     private ClassBooksDAO classBooksDAO;
     private SubjectsService subjectsService;
     private ClassService classService;
+    private List<Classbook> rawClassbooksList;
 
     public ClassbooksService() {
         classBooksDAO = new ClassbooksDAOImpl();
@@ -34,13 +36,13 @@ public class ClassbooksService {
 
         try {
             // Получаем список журналов.
-            List<Classbook> classbookList = classBooksDAO.getAllClassbooks();
+            rawClassbooksList = classBooksDAO.getAllClassbooks();
 
             // Формируем смёрдженный лист классов и предметов на основе списка журналов.
             // Мёрдж необходим для передачи в UI названия предмета и номера класса по их id из журнала.
             Map<Classbook, Subject> mixedList = new HashMap<>();
 
-            for (Classbook classbook : classbookList) {
+            for (Classbook classbook : rawClassbooksList) {
                 mixedList.put(classbook,
                     subjectsService.getSubjectById(classbook.getSubjectId()));
             }
@@ -86,7 +88,11 @@ public class ClassbooksService {
         }
 
         Classbook classbook = new Classbook();
+        // Идентификатор нового журнала.
+        classbook.setId(this.getMaxClassbooksId() + 1);
+        // Идентификатор класса.
         classbook.setClassId(classId);
+        // Идентификатор предмета.
         classbook.setSubjectId(subjectId);
         classBooksDAO.addNewClassbook(classbook);
     }
@@ -98,5 +104,13 @@ public class ClassbooksService {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return classbooks.size() >= 1;
+    }
+
+    // Метод, возвращающий максимальный идентификатор журнала из хранилища.
+    private int getMaxClassbooksId() {
+        return this.rawClassbooksList.stream()
+                .max(Comparator.comparing(y -> y.getId()))
+                .get()
+                .getId();
     }
 }

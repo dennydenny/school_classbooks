@@ -7,6 +7,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Classbook {
 
+    private int id;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     private int classId;
     private int subjectId;
 
