@@ -122,7 +122,7 @@ public class ConsoleUI {
     private static void workWithRatingsOption() {
         System.out.println("Что вы хотите сделать?");
         Arrays.asList(ratingsActions).stream()
-                .forEach(x -> System.out.println(x));
+                .forEach(System.out::println);
         int option = scanner.nextInt();
 
         switch (option) {
@@ -197,7 +197,7 @@ public class ConsoleUI {
     // Диалог установки предмета.
     private static String printSubjectEnterDialog(int classId) {
         boolean subjectIsCorrect = false;
-        String subjectName = new String();
+        String subjectName = "";
 
         // Выводим диалог до тех пор, пока пользователь не введёт корректный предмет.
         while (!subjectIsCorrect) {
@@ -227,7 +227,7 @@ public class ConsoleUI {
     // Диалог установки ФИО ученика.
     private static String printPupilNameEnterDialog(int classId) {
         boolean pupiltIsCorrect = false;
-        String pupilName = new String();
+        String pupilName = "";
         // Выводим диалог до тех пор, пока пользователь не введёт существующие ФИО.
         while (!pupiltIsCorrect) {
             System.out.println("Введите ФИО ученика:");
@@ -269,8 +269,8 @@ public class ConsoleUI {
         // Выводим диалог до тех пор, пока пользователь не введёт корректную дату в нужном формате.
         while (!rateDateIsCorrect) {
             System.out.println("Введите дату оценки (формат dd.mm.yyyy):");
-            String rawRateDate = scanner.nextLine();
             scanner.nextLine();
+            String rawRateDate = scanner.nextLine();
 
             // Приводим дату к нужному формату.
             try {
