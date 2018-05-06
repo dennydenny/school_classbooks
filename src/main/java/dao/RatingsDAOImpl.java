@@ -58,12 +58,6 @@ public class RatingsDAOImpl extends AbstractFileWriter implements RatingsDAO {
     public boolean deleteRate(Rating rating) {
         this.getAllRatings();
         // Исключаем переданную оценку из общего списка оценок.
-        /*allRatings = allRatings.stream()
-                .filter(x -> !x.getDate().equals(rating.getDate())
-                        && x.getClassbookId() != rating.getClassbookId()
-                        && x.getPupilId() != rating.getPupilId())
-                .collect(Collectors.toList());
-                */
         allRatings = allRatings.stream()
                 .filter(x -> x.getId() != rating.getId())
                 .collect(Collectors.toList());
