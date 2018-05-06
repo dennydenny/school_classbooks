@@ -1,10 +1,11 @@
-package models;
+package entities;
 
 public class Subject {
 
     private int id;
     private String name;
 
+    public Subject() {};
     public Subject(String name) {
         this.name = name;
     }
@@ -24,5 +25,9 @@ public class Subject {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
