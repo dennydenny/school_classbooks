@@ -1,1 +1,1 @@
-[{"id":0,"classbookId":1,"pupilId":3,"mark":5,"date":1525356474702},{"id":0,"classbookId":1,"pupilId":6,"mark":2,"date":1525356474702},{"id":1,"classbookId":1,"pupilId":3,"mark":5,"date":1525377600000}]
+[]

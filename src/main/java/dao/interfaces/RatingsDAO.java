@@ -13,4 +13,5 @@ public interface RatingsDAO {
     List<Rating> getAllRatings();
 
     boolean addNewRate(Rating rating);
+    boolean deleteRate(Rating rating);
 }

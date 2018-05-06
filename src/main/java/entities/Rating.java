@@ -1,5 +1,7 @@
 package entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 // Сущность оценка.
@@ -9,6 +11,7 @@ public class Rating {
     private int classbookId;
     private int pupilId;
     private int mark;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyy")
     private Date date;
 
     public Rating() {

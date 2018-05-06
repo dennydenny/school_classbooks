@@ -3,14 +3,12 @@ package services;
 import dao.RatingsDAOImpl;
 import dao.interfaces.RatingsDAO;
 import entities.Class;
-import entities.Pupil;
 import entities.Rating;
 import org.apache.logging.log4j.LogManager;
 
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -74,6 +72,61 @@ public class RatingsService {
     // Метод получения списка оценок.
     public List<Rating> getAllRatings() {
         return ratingsDAO.getAllRatings();
+    }
+
+    // Метод удаления оценки.
+    public boolean deleteRating(int classId, String subjectName, String pupilName, Date date) {
+        Rating rating = new Rating();
+        rating.setDate(date);
+
+        // Получаем идентификатор ученика.
+        // Получаем класс по идентификатору и имени ученика.
+        Class schoolClass = classService.getAllClasses().stream()
+                .filter(x -> x.getClassId() == classId
+                        &&
+                        x.getPupils().stream()
+                                .anyMatch(y -> y.getName().equals(pupilName)))
+                .collect(Collectors.toList())
+                .get(0);
+
+        // Проставляем идентификатор ученика из списка учеников класса.
+        rating.setPupilId(schoolClass.getPupils().stream()
+                .filter(x -> x.getName().equals(pupilName))
+                .collect(Collectors.toList())
+                .get(0)
+                .getpupilId());
+
+        // Получаем идентификатор журнала (фильтруем по имени предмета и ид класса).
+        rating.setClassbookId(classbooksService.getClassbooks().entrySet().stream()
+                .filter(x -> x.getValue().getName().equals(subjectName) && x.getKey().getClassId() == classId)
+                .collect(Collectors.toList())
+                .get(0)
+                .getKey()
+                .getId());
+
+        // Ищем полученную оценку в списке оценок.
+        Rating ratingToDelete;
+        try {
+            ratingToDelete = getAllRatings().stream()
+                    .filter(r -> r.getPupilId() == rating.getPupilId()
+                            &&
+                            r.getClassbookId() == rating.getClassbookId()
+                            &&
+                            r.getDate().equals(rating.getDate()))
+                    .collect(Collectors.toList())
+                    .get(0);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            logger.warn("Не удалось найти оценку ученика {} по предмету {} за дату {}.", pupilName, subjectName, date);
+            return false;
+        }
+
+        // Передаём в DAO.
+        if (ratingsDAO.deleteRate(rating)) {
+            logger.info("У ученика {} успешно удалена оценка по предмету {} за {}", pupilName, subjectName, date);
+        }
+        return true;
     }
 
 }

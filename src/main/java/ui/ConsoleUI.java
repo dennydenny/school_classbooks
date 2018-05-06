@@ -134,8 +134,10 @@ public class ConsoleUI {
                 showRatings();
                 break;
             case 3:
+
                 break;
             case 4:
+                deleteRatings();
                 break;
             default:
                 break;
@@ -267,12 +269,14 @@ public class ConsoleUI {
         // Выводим диалог до тех пор, пока пользователь не введёт корректную дату в нужном формате.
         while (!rateDateIsCorrect) {
             System.out.println("Введите дату оценки (формат dd.mm.yyyy):");
-            scanner.nextLine();
             String rawRateDate = scanner.nextLine();
+            scanner.nextLine();
 
+            // Приводим дату к нужному формату.
             try {
                 //rateDate = new SimpleDateFormat("dd.MM.yyyy").parse(rawRateDate);
                 SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+                //format.setTimeZone(TimeZone.getTimeZone("Europe/Samara"));
                 format.setLenient(false);
                 rateDate = format.parse(rawRateDate);
                 rateDateIsCorrect = true;
@@ -338,9 +342,25 @@ public class ConsoleUI {
         }
         else {
             System.out.println("Список оценок:");
-            ratings.stream().forEach(r -> System.out.format("Дата: %s Оценка: %d", df.format(r.getDate()), r.getMark()));
+            ratings.stream().forEach(r -> System.out.format("\nДата: %s Оценка: %d", df.format(r.getDate()), r.getMark()));
         }
     }
 
+    // Метод для удаления оценки.
+    private static void deleteRatings() {
+        // Получаем класс.
+        int classId = printClassEnterDialog();
 
+        // Получаем предмет
+        String subjectName = printSubjectEnterDialog(classId);
+
+        // Получаем ФИО ученика.
+        String pupilName = printPupilNameEnterDialog(classId);
+
+        // Получаем дату оценки.
+        Date rateDate = printRateDateEnterDialog();
+
+        // Передаём в сервис.
+        ratingsService.deleteRating(classId, subjectName, pupilName, rateDate);
+    }
 }

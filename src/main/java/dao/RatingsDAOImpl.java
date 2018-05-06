@@ -1,5 +1,6 @@
 package dao;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dao.interfaces.RatingsDAO;
 import dao.util.FileHelper;
@@ -7,10 +8,8 @@ import entities.Rating;
 import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by daniel.khaliulin on 04.05.2018.
@@ -31,6 +30,9 @@ public class RatingsDAOImpl extends AbstractFileWriter implements RatingsDAO {
         }
 
         ObjectMapper mapper = new ObjectMapper();
+        // Костыльное решение, без которого даты вида 11.11.11 считывались с учётом местного смещения и были 11.11.11 04:00.
+        mapper.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+        mapper.setTimeZone(TimeZone.getTimeZone("GMT+4"));
         try {
             allRatings = new ArrayList<>(Arrays.asList(mapper.readValue(FileHelper.getDataFile(fileName), Rating[].class)));
         } catch (IOException e) {
@@ -45,6 +47,22 @@ public class RatingsDAOImpl extends AbstractFileWriter implements RatingsDAO {
     public boolean addNewRate(Rating rating) {
         this.getAllRatings();
         allRatings.add(rating);
+        // Очищаем файл.
+        FileHelper.cleanDataFileContent(fileName);
+        // Записываем обновленные данные в файл.
+        super.writeListToFile(allRatings, fileName);
+        return true;
+    }
+
+    // Метод удаления оценки.
+    public boolean deleteRate(Rating rating) {
+        this.getAllRatings();
+        // Исключаем переданную оценку из общего списка оценок.
+        allRatings = allRatings.stream()
+                .filter(x -> x.getDate() != rating.getDate()
+                        && x.getClassbookId() != rating.getClassbookId()
+                        && x.getPupilId() != rating.getPupilId())
+                .collect(Collectors.toList());
         // Очищаем файл.
         FileHelper.cleanDataFileContent(fileName);
         // Записываем обновленные данные в файл.
