@@ -134,7 +134,7 @@ public class ConsoleUI {
                 showRatings();
                 break;
             case 3:
-
+                modifyRatings();
                 break;
             case 4:
                 deleteRatings();
@@ -249,7 +249,7 @@ public class ConsoleUI {
         int rate = 0;
         // Выводим диалог до тех пор, пока пользователь не введёт корректную оценку.
         while (!rateIsCorrect) {
-            System.out.println("Введите оценку:");
+            System.out.println("Введите новую оценку:");
             rate = scanner.nextInt();
 
             if (rate < 1 || rate > 5) {
@@ -362,5 +362,28 @@ public class ConsoleUI {
 
         // Передаём в сервис.
         ratingsService.deleteRating(classId, subjectName, pupilName, rateDate);
+    }
+
+    // Метод для редактирования существующей оценки.
+    private static void modifyRatings() {
+        // Получаем класс.
+        int classId = printClassEnterDialog();
+
+        // Получаем предмет
+        String subjectName = printSubjectEnterDialog(classId);
+
+        // Получаем ФИО ученика.
+        String pupilName = printPupilNameEnterDialog(classId);
+
+        // Получаем новую оценку.
+        int rate = printRateEnterDialog();
+
+        // Получаем дату
+        Date rateDate = printRateDateEnterDialog();
+
+        // Удаляем оценку.
+        ratingsService.deleteRating(classId, subjectName, pupilName, rateDate);
+        // Добавляем новую оценку.
+        ratingsService.addNewRate(classId, subjectName, pupilName, rate, rateDate);
     }
 }
