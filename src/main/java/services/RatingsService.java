@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 /**
@@ -57,12 +58,19 @@ public class RatingsService {
                 .get(0)
                 .getKey()
                 .getId());
+        try {
+            // Инкременитрируем идентификатор оценки.
+            rating.setId(ratingsDAO.getAllRatings().stream().
+                    max(Comparator.comparing(y -> y.getId()))
+                    .get()
+                    .getId() + 1);
 
-        // Инкременитрируем идентификатор оценки.
-        rating.setId(ratingsDAO.getAllRatings().stream().
-                max(Comparator.comparing(y -> y.getId()))
-                .get()
-                .getId() + 1);
+        }
+        // Отлавливаем кейс, когда наша оценка первая.
+        catch (NoSuchElementException e) {
+            rating.setId(1);
+        }
+
         // Передаём в DAO.
         if (ratingsDAO.addNewRate(rating)) {
             logger.info("Ученику {} поставлена оценка {} по предмету {}", pupilName, rate, subjectName);
@@ -123,7 +131,7 @@ public class RatingsService {
         }
 
         // Передаём в DAO.
-        if (ratingsDAO.deleteRate(rating)) {
+        if (ratingsDAO.deleteRate(ratingToDelete)) {
             logger.info("У ученика {} успешно удалена оценка по предмету {} за {}", pupilName, subjectName, date);
         }
         return true;
